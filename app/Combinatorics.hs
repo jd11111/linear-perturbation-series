@@ -39,3 +39,8 @@ starsBarsToComp l =  catMaybes [if x== [False] && y == [False] then Just 0 else 
 
 weakComps :: Int -> [[Int]]
 weakComps n = map (starsBarsToComp . splitAtChange . treeToWord) (treesWithLeafs n)
+
+main:: IO()
+main = do{
+  print "allooo"
+}

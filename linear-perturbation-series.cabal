@@ -68,9 +68,8 @@ executable linear-perturbation-series
 
     -- Other library packages from which modules are imported.
     build-depends:    base ^>=4.17.2.1, hmatrix
-
     -- Directories containing source files.
     hs-source-dirs:   app
-
     -- Base language which the package is written in.
     default-language: Haskell2010
+    ghc-options: -threaded -o -with-rtsopts=-N

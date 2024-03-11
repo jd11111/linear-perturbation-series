@@ -7,23 +7,26 @@ matMul :: Numeric t => Matrix t -> Matrix t -> Matrix t
 matMul = (Numeric.LinearAlgebra.<>)
 
 matPow ::Int -> Matrix C -> Matrix C
-matPow 0 _ = idMat
+matPow 1 m = m
 matPow n m = matMul m (matPow (n-1) m)
 
 trace :: Matrix C -> C
 trace = sum . toList . takeDiag
 
+dim::Int
+dim= 3
+
 p:: Matrix C
-p = (3><3) [ 1, 0, 0, 0, 0, 0, 0, 0, 0]
+p = (dim><dim) [ 1, 0, 0, 0, 0, 0, 0, 0, 0]
 
 v :: Matrix C
-v = (3><3) [1,-1,3,-5,3,2,-4,-8,1]
+v = (dim><dim) [1,-1,3,-5,3,2,-4,-8,1]
 
 s :: Matrix C
-s = (3><3) [0,0,0,0,1/(1-4),0,0,0,1/(1+3)]
+s = (dim><dim) [0,0,0,0,1/(1-4),0,0,0,1/(1+3)]
 
 idMat :: Matrix C
-idMat = ident 3
+idMat = ident dim
 
 intToMat :: Int -> Matrix C
 intToMat 0 = matMul v p
