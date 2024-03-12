@@ -21,7 +21,7 @@ treeToWord (Node t1 t2) = concat [[False],treeToWord t1, [True],treeToWord t2]
 accOrSplit :: (a -> a -> Bool) -> a -> [[a]] -> [[a]]
 accOrSplit f x l = (x:xs):xss where
   xs:xss = case l of
-    (y:_):_ | f x y -> []:l -- if the first element y (which is a list itself) of l is not the empty list and f x y is true, then return []:l which will ultimately lead to the singleton [x] being prepended to l
+    (y:_):_ | f x y -> []:l -- if the first element of l is not the empty list and f x y is true, then return []:l which will ultimately lead to the singleton [x] being prepended to l
     _ -> l -- anything else: return l, which will ultimately lead to x being prepended to the first element (list) of l
 
 splitWhen :: (a -> a -> Bool) -> [a] -> [[a]]
@@ -39,8 +39,3 @@ starsBarsToComp l =  catMaybes [if x== [False] && y == [False] then Just 0 else 
 
 weakComps :: Int -> [[Int]]
 weakComps n = map (starsBarsToComp . splitAtChange . treeToWord) (treesWithLeafs n)
-
-main:: IO()
-main = do{
-  print "allooo"
-}

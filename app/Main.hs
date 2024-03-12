@@ -1,45 +1,48 @@
 module Main where
 
-import Numeric.LinearAlgebra
 import Combinatorics
+import Data.Array
+import Control.Parallel.Strategies
 
-matMul :: Numeric t => Matrix t -> Matrix t -> Matrix t
-matMul = (Numeric.LinearAlgebra.<>)
+matMul :: (Ix a, Ix b, Ix c, Num d) => Array (a,b) d -> Array (b,c) d -> Array (a,c) d
+matMul x y = array resultBounds [((i,j), sum [x!(i,k) * y!(k,j) | k <- range (lj,uj)])| i <- range (li,ui), j <- range (lj',uj')]
+        where ((li,lj),(ui,uj))         =  bounds x
+              ((li',lj'),(ui',uj'))     =  bounds y
+              resultBounds | (lj,uj)==(li',ui')    =  ((li,lj'),(ui,uj')) | otherwise = error "wrong shape"
 
-matPow ::Int -> Matrix C -> Matrix C
-matPow 1 m = m
-matPow n m = matMul m (matPow (n-1) m)
+trace :: (Ix a, Num d) => Array (a,a) d -> d
+trace x = sum [x!(i,i) | i <- range(li,ui)] where ((li,_),(ui,_)) = bounds x 
 
-trace :: Matrix C -> C
-trace = sum . toList . takeDiag
+matPow :: (Ix a, Num d) => Int -> Array (a,a) d -> Array (a,a) d
+matPow 1 x = x
+matPow n x = matMul x (matPow (n-1) x)
 
-dim::Int
-dim= 3
+scaMul :: (Ix a, Num d) => d -> Array (a,a) d -> Array (a,a) d
+scaMul alpha x = array ((li,lj),(ui,uj)) [((i,j),alpha*x!(i,j)) | i <- range (li,ui), j <- range (lj,uj)] where ((li,lj),(ui,uj)) = bounds x
 
-p:: Matrix C
-p = (dim><dim) [ 1, 0, 0, 0, 0, 0, 0, 0, 0]
+matSum :: (Ix a, Num d) => Array (a,a) d -> Array (a,a) d -> Array (a,a) d
+matSum x y = array ((li,lj),(ui,uj)) [((i,j),y!(i,j) + x!(i,j)) | i <- range (li,ui), j <- range (lj,uj)] where ((li,lj),(ui,uj)) = bounds x
 
-v :: Matrix C
-v = (dim><dim) [1,-1,3,-5,3,2,-4,-8,1]
+p:: Array (Int, Int) Double
+p = array ((0,0),(2,2)) [((0,0),1.0), ((0,1),0.0),((0,2),0.0), ((1,0),0.0), ((1,1),0.0), ((1,2),0.0), ((2,0),0.0), ((2,1),0.0), ((2,2),0.0)]
+v:: Array (Int, Int) Double
+v = array ((0,0),(2,2)) [((0,0),1.0), ((0,1),-1.0),((0,2),3.0), ((1,0),-5.0), ((1,1),3.0), ((1,2),2.0), ((2,0),-4.0), ((2,1),-8.0), ((2,2),1.0)]
+s:: Array (Int, Int) Double
+s = array ((0,0),(2,2)) [((0,0),0.0), ((0,1),0.0),((0,2),0.0), ((1,0),0.0), ((1,1),1.0/(1.0-4.0)), ((1,2),0.0), ((2,0),0.0), ((2,1),0.0), ((2,2),1.0/(1.0+3.0))]
 
-s :: Matrix C
-s = (dim><dim) [0,0,0,0,1/(1-4),0,0,0,1/(1+3)]
 
-idMat :: Matrix C
-idMat = ident dim
-
-intToMat :: Int -> Matrix C
+intToMat :: Int -> Array (Int, Int) Double
 intToMat 0 = matMul v p
-intToMat n = (-1)^(n+1)* matMul v (matPow n s)
+intToMat n = scaMul ((-1.0)^(n+1)) (matMul v (matPow n s))
 
-weakCombToMat :: [Int] -> Matrix C
-weakCombToMat [] = idMat
+weakCombToMat :: [Int] -> Array (Int, Int) Double
+weakCombToMat (x:[])= intToMat x
 weakCombToMat (x:xs) = matMul (intToMat x) (weakCombToMat xs)
 
-pertCoeff :: Int -> C
-pertCoeff n = trace . sum $ (map weakCombToMat (weakComps (n+1)))
+--pertCoeff :: Int -> C
+pertCoeff n = trace $ foldr1 matSum (map weakCombToMat (weakComps (n+1)))
 
 main:: IO()
 main = do{
-  print $ map pertCoeff (take 13 [0..]);
+  print $ parMap rdeepseq pertCoeff (take 13 [0..]);
 }
