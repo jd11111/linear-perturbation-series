@@ -39,10 +39,9 @@ weakCombToMat :: [Int] -> Array (Int, Int) Double
 weakCombToMat (x:[])= intToMat x
 weakCombToMat (x:xs) = matMul (intToMat x) (weakCombToMat xs)
 
---pertCoeff :: Int -> C
-pertCoeff n = trace $ foldr1 matSum (map weakCombToMat (weakComps (n+1)))
+pertCoeff n = sum $ parMap rdeepseq (trace . weakCombToMat) (weakComps (n+1))
 
 main:: IO()
 main = do{
-  print $ parMap rdeepseq pertCoeff (take 13 [0..]);
+  print $ map pertCoeff (take 14 [0..]);
 }
