@@ -2,10 +2,14 @@ module Main where
 
 import Combinatorics
 import Data.Array
+import Data.List
 import Control.Parallel.Strategies
 
+goodSum:: Num d => [d] -> d
+goodSum = foldl' (+) 0
+
 matMul :: (Ix a, Ix b, Ix c, Num d) => Array (a,b) d -> Array (b,c) d -> Array (a,c) d
-matMul x y = array resultBounds [((i,j), sum [x!(i,k) * y!(k,j) | k <- range (lj,uj)])| i <- range (li,ui), j <- range (lj',uj')]
+matMul x y = array resultBounds [((i,j), goodSum [x!(i,k) * y!(k,j) | k <- range (lj,uj)])| i <- range (li,ui), j <- range (lj',uj')]
         where ((li,lj),(ui,uj))         =  bounds x
               ((li',lj'),(ui',uj'))     =  bounds y
               resultBounds | (lj,uj)==(li',ui')    =  ((li,lj'),(ui,uj')) | otherwise = error "wrong shape"
@@ -39,7 +43,7 @@ weakCombToMat :: [Int] -> Array (Int, Int) Double
 weakCombToMat (x:[])= intToMat x
 weakCombToMat (x:xs) = matMul (intToMat x) (weakCombToMat xs)
 
-pertCoeff n = sum $ parMap rdeepseq (trace . weakCombToMat) (weakComps (n+1))
+pertCoeff n = goodSum $ parMap rdeepseq (trace . weakCombToMat) (weakComps (n+1))
 
 main:: IO()
 main = do{
