@@ -5,6 +5,11 @@ import Data.Array
 import Data.List
 import Control.Parallel.Strategies
 
+
+import qualified Control.Monad.State.Strict as CMSS
+import qualified Data.HashMap.Strict as DHS
+import qualified Data.Hashable
+
 matMul :: (Ix a, Ix b, Ix c, Num d) => Array (a,b) d -> Array (b,c) d -> Array (a,c) d
 matMul x y = array resultBounds [((i,j), sum [x!(i,k) * y!(k,j) | k <- range (lj,uj)])| i <- range (li,ui), j <- range (lj',uj')]
         where ((li,lj),(ui,uj))         =  bounds x
@@ -34,21 +39,39 @@ v = array ((0,0),(2,2)) [((0,0),1.0), ((0,1),-1.0),((0,2),3.0), ((1,0),-5.0), ((
 s:: Array (Int, Int) Double
 s = array ((0,0),(2,2)) [((0,0),0.0), ((0,1),0.0),((0,2),0.0), ((1,0),0.0), ((1,1),1.0/(1.0-4.0)), ((1,2),0.0), ((2,0),0.0), ((2,1),0.0), ((2,2),1.0/(1.0+3.0))]
 
+--weakCombToMat :: [Int] -> Array (Int, Int) Double --can i memoize this too?
+--weakCombToMat (x:[])= intToMat x
+--weakCombToMat (x:xs) = matMul (memoIntToMat x) (weakCombToMat xs)
+
+--pertCoeff n = sum $ map (trace . weakCombToMat) (weakComps (n+1))
+
+type MyMemo a b = CMSS.State (DHS.HashMap a b) b
+
+
+memoIntToMat :: Int -> Array (Int, Int) Double
+memoIntToMat = (map intToMat [0 ..] !!)
+
+sMemo :: Int -> Array (Int, Int) Double
 sMemo = memoMatPow s
 
 intToMat :: Int -> Array (Int, Int) Double --memoize this 
 intToMat 0 = matMul v p
 intToMat n = scaMul ((-1.0)^(n+1)) (matMul v (sMemo n))
 
-memoIntToMat = (map intToMat [0 ..] !!)
+myMemo :: Data.Hashable.Hashable a => (a -> MyMemo a b) -> a -> MyMemo a b
+myMemo f x = CMSS.gets (DHS.lookup x) >>= maybe z return where z = f x >>= (\ y -> CMSS.modify (DHS.insert x y) >> return y)
 
-weakCombToMat :: [Int] -> Array (Int, Int) Double --can i memoize this too?
-weakCombToMat (x:[])= intToMat x
-weakCombToMat (x:xs) = matMul (memoIntToMat x) (weakCombToMat xs)
+runMyMemo :: (a -> MyMemo a b) -> a -> b
+runMyMemo f x = CMSS.evalState (f x) DHS.empty
 
-pertCoeff n = sum $ map (trace . weakCombToMat) (weakComps (n+1))
+weakCombToMatMemo :: [Int] -> MyMemo [Int] (Array (Int, Int) Double)
+weakCombToMatMemo (x:[])= return (memoIntToMat x)
+weakCombToMatMemo (x:xs) = myMemo weakCombToMatMemo xs >>= \y -> return $ matMul (memoIntToMat x) y
+
+pertCoeffMemo :: Int -> Double
+pertCoeffMemo n = sum $ map (trace . runMyMemo weakCombToMatMemo) (weakComps (n+1))
 
 main:: IO()
 main = do{
-  print $ parMap rdeepseq pertCoeff (take 14 [0..]);
+  print $ parMap rdeepseq pertCoeffMemo (take 14 [0..]);
 }

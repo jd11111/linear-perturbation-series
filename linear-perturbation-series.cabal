@@ -67,7 +67,7 @@ executable linear-perturbation-series
     -- other-extensions:
 
     -- Other library packages from which modules are imported.
-    build-depends:    base ^>=4.17.2.1, array ^>=0.5.4.0, parallel ^>=3.2.2.0
+    build-depends:    base ^>=4.17.2.1, array ^>=0.5.4.0, parallel ^>=3.2.2.0, unordered-containers, mtl ^>=2.2.2, hashable
     -- Directories containing source files.
     hs-source-dirs:   app
     -- Base language which the package is written in.
