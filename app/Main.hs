@@ -39,12 +39,6 @@ v = array ((0,0),(2,2)) [((0,0),1.0), ((0,1),-1.0),((0,2),3.0), ((1,0),-5.0), ((
 s:: Array (Int, Int) Double
 s = array ((0,0),(2,2)) [((0,0),0.0), ((0,1),0.0),((0,2),0.0), ((1,0),0.0), ((1,1),1.0/(1.0-4.0)), ((1,2),0.0), ((2,0),0.0), ((2,1),0.0), ((2,2),1.0/(1.0+3.0))]
 
---weakCombToMat :: [Int] -> Array (Int, Int) Double --can i memoize this too?
---weakCombToMat (x:[])= intToMat x
---weakCombToMat (x:xs) = matMul (memoIntToMat x) (weakCombToMat xs)
-
---pertCoeff n = sum $ map (trace . weakCombToMat) (weakComps (n+1))
-
 type MyMemo a b = CMSS.State (DHS.HashMap a b) b
 
 
@@ -54,24 +48,26 @@ memoIntToMat = (map intToMat [0 ..] !!)
 sMemo :: Int -> Array (Int, Int) Double
 sMemo = memoMatPow s
 
-intToMat :: Int -> Array (Int, Int) Double --memoize this 
+intToMat :: Int -> Array (Int, Int) Double 
 intToMat 0 = matMul v p
 intToMat n = scaMul ((-1.0)^(n+1)) (matMul v (sMemo n))
 
 myMemo :: Data.Hashable.Hashable a => (a -> MyMemo a b) -> a -> MyMemo a b
 myMemo f x = CMSS.gets (DHS.lookup x) >>= maybe z return where z = f x >>= (\ y -> CMSS.modify (DHS.insert x y) >> return y)
 
-runMyMemo :: (a -> MyMemo a b) -> a -> b
-runMyMemo f x = CMSS.evalState (f x) DHS.empty
+runMyMemo :: (t -> CMSS.State s a) -> s -> t -> (a, s)
+runMyMemo f sta x = CMSS.runState (f x) sta 
 
 weakCombToMatMemo :: [Int] -> MyMemo [Int] (Array (Int, Int) Double)
 weakCombToMatMemo (x:[])= return (memoIntToMat x)
 weakCombToMatMemo (x:xs) = myMemo weakCombToMatMemo xs >>= \y -> return $ matMul (memoIntToMat x) y
 
-pertCoeffMemo :: Int -> Double
-pertCoeffMemo n = sum $ map (trace . runMyMemo weakCombToMatMemo) (weakComps (n+1))
+pertCoeffNew :: [[Int]] -> (Double, DHS.HashMap [Int] (Array (Int, Int) Double))
+pertCoeffNew [] = (0.0,DHS.empty)
+pertCoeffNew (x:xs) = (a,b) where{ a = fst (pertCoeffNew xs) + (trace . fst . runMyMemo weakCombToMatMemo (snd (pertCoeffNew xs))) x; b = snd . runMyMemo weakCombToMatMemo (snd (pertCoeffNew xs)) $ x;}
 
 main:: IO()
 main = do{
-  print $ parMap rdeepseq pertCoeffMemo (take 14 [0..]);
+  --print $ fst ( pertCoeffNew (weakComps 9));
+  print $ map (fst . pertCoeffNew . weakComps) (take 11 [0..]);
 }
