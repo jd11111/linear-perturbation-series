@@ -1,6 +1,6 @@
 module Combinatorics where
-
 import Data.Maybe
+import Data.Foldable
 
 data Tree = Leaf | Node Tree Tree deriving Show
 

@@ -56,11 +56,15 @@ weakCombToMatMemo [x] = return (memoIntToMat x)
 weakCombToMatMemo (x:xs) = myMemo weakCombToMatMemo xs >>= \y -> return $ matMul (memoIntToMat x) y
 weakCombToMatMemo _ = undefined
 
-pertCoeffNew :: [[Int]] -> (Float, DHS.HashMap [Int] Matrix)
-pertCoeffNew [] = (0.0,DHS.empty)
-pertCoeffNew (x:xs) = let w = pertCoeffNew xs in let z = runMyMemo weakCombToMatMemo (snd w) in (fst w + (trace . fst . z) x,snd . z $ x)
+pertCoeffNew2 ::DHS.HashMap [Int] Matrix-> [[Int]] -> (Float, DHS.HashMap [Int] Matrix)
+pertCoeffNew2 st [] = (0.0,st)
+pertCoeffNew2 st (x:xs) = let w = pertCoeffNew2 st xs in let z = runMyMemo weakCombToMatMemo (snd w) in (fst w + (trace . fst . z) x,snd . z $ x)
+
+pertCoeff :: Int -> ([Float],DHS.HashMap [Int] Matrix)
+pertCoeff 1 = let z = pertCoeffNew2 DHS.empty (weakComps 1) in ([fst z],snd z)
+pertCoeff n = let w = pertCoeff (n-1) in let z = pertCoeffNew2 (snd w) (weakComps n) in ((fst z):(fst w),snd z)
 
 main:: IO()
 main = do{
-  print $ map (fst . pertCoeffNew . weakComps) (take 10 [1..]);
+  print . reverse $ fst (pertCoeff 14);
 }
