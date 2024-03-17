@@ -11,7 +11,6 @@ import MatMul
 trace :: Matrix -> Float
 trace x =let{
     a = int_data x;
-    ra = rows x;
     ca = cols x;
 } in sum [a!(i*ca + i)| i <- range(0,ca-1)]
 
@@ -20,13 +19,13 @@ matPow 1 x = x
 matPow n x = matMul x (matPow (n-1) x)
 
 memoMatPow :: Matrix -> Int -> Matrix
-memoMatPow x = (map (pow x) [0 ..] !!) where { pow x 1 = x; pow x n = matMul x (memoMatPow x (n-1))}
+memoMatPow x = (map (pow x) [0 ..] !!) where { pow y 1 = y; pow y n = matMul y (memoMatPow y (n-1))}
 
 scaMul :: Float -> Matrix -> Matrix
 scaMul alpha x = let{a = int_data x; ra = rows x; ca = cols x;} in let{!z = array (li,ui) [(i,alpha*(a! i)) | i <- range (li, ui)] where (li,ui)=bounds a} in GenMat{int_data=z, rows = ra, cols = ca}
 
 p:: Matrix
-p = GenMat{int_data = listArray (0,8) [1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0], rows=3, cols=3} 
+p = GenMat{int_data = listArray (0,8) [1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0], rows=3, cols=3}
 
 v:: Matrix
 v = GenMat{int_data = listArray (0,8) [1.0,-1.0,3.0,-5.0,3.0,2.0,-4.0,-8.0,1.0], rows=3, cols=3}
@@ -53,8 +52,9 @@ runMyMemo :: (t -> CMSS.State s a) -> s -> t -> (a, s)
 runMyMemo f sta x = CMSS.runState (f x) sta
 
 weakCombToMatMemo :: [Int] -> MyMemo [Int] Matrix
-weakCombToMatMemo (x:[])= return (memoIntToMat x)
+weakCombToMatMemo [x] = return (memoIntToMat x)
 weakCombToMatMemo (x:xs) = myMemo weakCombToMatMemo xs >>= \y -> return $ matMul (memoIntToMat x) y
+weakCombToMatMemo _ = undefined
 
 pertCoeffNew :: [[Int]] -> (Float, DHS.HashMap [Int] Matrix)
 pertCoeffNew [] = (0.0,DHS.empty)
@@ -62,5 +62,5 @@ pertCoeffNew (x:xs) = let w = pertCoeffNew xs in let z = runMyMemo weakCombToMat
 
 main:: IO()
 main = do{
-  print $ map (fst . pertCoeffNew . weakComps) (take 12 [1..]);
+  print $ map (fst . pertCoeffNew . weakComps) (take 10 [1..]);
 }

@@ -25,7 +25,7 @@ matMul x y  =let{
         getB i j = b!(i*cb + j); -- access the (i,j) entry of b from the row major storage
         {-# INLINE getB #-};
     }
-    in let !z = Data.Array.ST.runSTUArray $ do{
+    in let z = Data.Array.ST.runSTUArray $ do{
         arr <- Data.Array.ST.newArray (0,ra*cb-1) 0.0 :: Control.Monad.ST.ST s (Data.Array.ST.STUArray s Int Float);--zero initialised output array
         acc <- Data.STRef.newSTRef 0.0; --zero initialised accumulator variable
         Control.Monad.forM_ [0..(ra-1)] $ \i -> do{ --loop over all rows of a
