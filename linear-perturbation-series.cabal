@@ -61,7 +61,7 @@ executable linear-perturbation-series
     main-is:          Main.hs
 
     -- Modules included in this executable, other than Main.
-    other-modules: Combinatorics
+    other-modules: Combinatorics, MatMul
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
@@ -72,4 +72,4 @@ executable linear-perturbation-series
     hs-source-dirs:   app
     -- Base language which the package is written in.
     default-language: Haskell2010
-    ghc-options: -threaded -O2 -prof -fprof-auto -rtsopts "-with-rtsopts=-p -N"
+    ghc-options: -O2 -prof -fprof-auto -rtsopts "-with-rtsopts=-p"
