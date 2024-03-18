@@ -1,0 +1,66 @@
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{mathtools}
+\usepackage{graphicx}
+\usepackage[english]{babel}
+\usepackage{xcolor}
+\usepackage{caption}
+\usepackage{hyperref}
+
+\title{Linear Perturbation Series Documentation}
+\author{Jannik Daun}
+\begin{document}
+
+\maketitle
+\tableofcontents
+
+\section{Exact Solution Of 2x2 Case}
+
+For $E_1, E_2, a \in \mathbb{R}$
+let
+$$H:=
+\begin{pmatrix}
+E_1 & 0 \\
+0 & E_2
+\end{pmatrix}$$
+and
+$$
+V :=
+\begin{pmatrix}
+0 & a \\
+a & 0
+\end{pmatrix}.
+$$
+Define $T: \mathbb{C} \to \mathbb{C}^{2 \times 2}$
+by $T \ x =  H + x \cdot V$.
+
+The two eigenvalues $E_\pm$ of $T \  x$ (the roots of the characteristic polynomial) can be found as
+\begin{equation}
+   E_\pm (x) =  \frac{E_{1}+ E_2}{2}
+   \pm \frac{|E_1 -E_2|}{2} \sqrt{
+    1 + \bigg(\frac{2 a x}{E_1-E_2}\bigg)^2
+   }.
+\end{equation}
+Now the binomial series says that for $x \in \mathbb{C}$ with $|x|<1$:
+\begin{equation}
+    (1+x)^{1/2} = \sum_{k=0}^\infty
+    {1/2 \choose k} x^k,
+\end{equation}
+where the radius of convergence of the power series is 1.
+Therefore
+\begin{equation}
+    \begin{split}
+        E_\pm (x) &=  \frac{E_{1}+ E_2}{2}
+   \pm \frac{|E_1 -E_2|}{2} \sum_{k=0}^\infty
+   {1/2 \choose k} \bigg(\frac{2 a x}{E_1-E_2}\bigg)^{2k} \\
+   &= 
+    \end{split}
+\end{equation}
+where the radius of convergence is
+\begin{equation}
+    \frac{|E_1 -E_2|}{2a} .
+\end{equation}
+\end{document}

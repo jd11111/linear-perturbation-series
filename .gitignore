@@ -2,3 +2,10 @@ dist-*
 -*
 linear-perturbation-series.hp
 linear-perturbation-series.prof
+doc/doc.aux
+doc/doc.fdb_latexmk
+doc/doc.log
+doc/doc.out
+doc/doc.synctex.gz
+doc/doc.toc
+doc/doc.fls
