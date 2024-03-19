@@ -44,6 +44,13 @@ The two eigenvalues $E_\pm$ of $T \  x$ (the roots of the characteristic polynom
     1 + \bigg(\frac{2 a x}{E_1-E_2}\bigg)^2
    }.
 \end{equation}
+Now upon potentially relabeling $E_\pm$ we obtain
+\begin{equation}
+    E_\pm (x) =  \frac{E_{1}+ E_2}{2}
+    \pm \frac{E_1 -E_2}{2} \sqrt{
+     1 + \bigg(\frac{2 a x}{E_1-E_2}\bigg)^2
+    }.
+ \end{equation}
 Now the binomial series says that for $x \in \mathbb{C}$ with $|x|<1$:
 \begin{equation}
     (1+x)^{1/2} = \sum_{k=0}^\infty
@@ -54,9 +61,10 @@ Therefore
 \begin{equation}
     \begin{split}
         E_\pm (x) &=  \frac{E_{1}+ E_2}{2}
-   \pm \frac{|E_1 -E_2|}{2} \sum_{k=0}^\infty
+   \pm \frac{E_1 -E_2}{2} \sum_{k=0}^\infty
    {1/2 \choose k} \bigg(\frac{2 a x}{E_1-E_2}\bigg)^{2k} \\
-   &= 
+   &= E_{1/2} \pm \frac{1}{2} \sum_{k=1}^\infty
+   {1/2 \choose k} \frac{(2 a)^{2k}}{(E_1-E_2)^{2k-1}} x^{2k}
     \end{split}
 \end{equation}
 where the radius of convergence is
