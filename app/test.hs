@@ -8,7 +8,7 @@ fac 0 = 1
 fac 1 = 1
 fac n = n * fac (n-1)
 
-falling:: Float -> Integer -> Float --"poch-hammer symbol"
+falling:: Float -> Integer -> Float
 falling _ 0 = 1
 falling r k = r * falling (r-1) (k-1)
 
@@ -22,7 +22,6 @@ pertCoeffExactE1 e1 e2 a k = 0.5*(2.0*a)^(2*k)* binomCoeff 0.5 k /((e1 - e2)^(2*
 
 --exact solution for the coefficients in the perturbation series for
 --the eigenvalue that splits from e2:
-pertCoeffExactE1 e1 e2 a k = 0.5*(2.0*a)^(2*k)* binomCoeff 0.5 k /((e1 - e2)^(2*k-1))
 pertCoeffExactE2 ::  Float -> Float -> Float -> Integer -> Float 
 pertCoeffExactE2 e1 e2 a k = (-1)*pertCoeffExactE1 e1 e2 a k
 
@@ -30,7 +29,7 @@ n :: Integer
 n = 5 
 
 closeCheck :: Float -> Float -> Bool
-closeCheck f1 f2 = abs (f1 - f2)  <= 0.000001* (abs f1 + abs f2)
+closeCheck f1 f2 = abs (f1 - f2)  <= 0.000001 * (abs f1 + abs f2)
 
 allClose :: [Float] -> [Float] -> Bool
 allClose l1 l2 = foldr (&&) True (map (uncurry closeCheck) (zip l1 l2))
@@ -38,7 +37,7 @@ allClose l1 l2 = foldr (&&) True (map (uncurry closeCheck) (zip l1 l2))
 main :: IO()
 main = do{
     gen <- newStdGen;
-    let ns = randoms gen :: [Float] in let {
+    let {ns = randoms gen :: [Float];
         e1 = 2.0*(ns !! 1)-1.0;
         e2 = 2.0*(ns !! 2)-1.0;
         a = 2.0*(ns !! 3) -1.0;
