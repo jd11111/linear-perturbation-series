@@ -32,7 +32,7 @@ closeCheck :: Float -> Float -> Bool
 closeCheck f1 f2 = abs (f1 - f2)  <= 0.000001 * (abs f1 + abs f2)
 
 allClose :: [Float] -> [Float] -> Bool
-allClose l1 l2 = foldr (&&) True (map (uncurry closeCheck) (zip l1 l2))
+allClose l1 l2 = foldr ((&&) . uncurry closeCheck) True (zip l1 l2)
 
 main :: IO()
 main = do{
@@ -46,14 +46,15 @@ main = do{
         v = GenMat{int_data = listArray (0,3) [0.0,a,a,0.0], rows=2, cols=2};
         s1 = GenMat{int_data = listArray (0,3) [0.0,0.0,0.0,1/(e1 -e2)], rows=2, cols=2};
         s2 = GenMat{int_data = listArray (0,3) [1/(e2-e1),0.0,0.0,0.0], rows=2, cols=2};
-        x = concatMap (\z-> 0:[z]) $ map (pertCoeffExactE1 e1 e2 a) [1.. n];
-        y = concatMap (\z-> 0:[z]) $ map (pertCoeffExactE2 e1 e2 a) [1..n];
+        x = concatMap ((\z-> 0:[z]) . pertCoeffExactE1 e1 e2 a) [1.. n];
+        y = concatMap ((\z-> 0:[z]) . pertCoeffExactE2 e1 e2 a) [1..n];
         z1 = reverse $ fst (pertCoeff v p1 s1 (2* fromInteger n));
         z2 = reverse $ fst (pertCoeff v p2 s2 (2* fromInteger n));
-        } in (print "exact E1:") >> (print x)
-        >> (print "calculated:") >> (print z1)
-        >> (print "all close?") >> (print $ allClose x z1)
-        >> (print "exact E2") >> (print y)
-        >> (print "calculated:") >> (print z2)
-        >> (print "all close?") >> (print $ allClose y z2 )
+        } in if e1 == e2 then print "e1 = e2 so no computation done" else
+        print "exact E1:" >> print x
+        >> print "calculated:" >> print z1
+        >> print "all close?" >> print (allClose x z1)
+        >> print "exact E2" >> print y
+        >> print "calculated:" >> print z2
+        >> print "all close?" >> print (allClose y z2)
     }

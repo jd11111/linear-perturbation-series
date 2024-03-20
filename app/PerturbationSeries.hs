@@ -29,7 +29,7 @@ intToMat v p _ 0 = matMul v p
 intToMat v _ s n = scaMul ((-1.0)^(n+1)) (matMul v (memoMatPow s n))
 
 memoIntToMat :: Matrix -> Matrix -> Matrix -> Int -> Matrix
-memoIntToMat v p s  = ((map (intToMat v p s) [0 ..]) !!)
+memoIntToMat v p s  = (map (intToMat v p s) [0 ..] !!)
 
 type MyMemo a b = CMSS.State (DHS.HashMap a b) b
 
