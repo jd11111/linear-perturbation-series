@@ -9,6 +9,9 @@
 \usepackage{xcolor}
 \usepackage{caption}
 \usepackage{hyperref}
+\usepackage{mathrsfs}
+
+\DeclareMathOperator{\tr}{tr}
 
 \title{Linear Perturbation Series Documentation}
 \author{Jannik Daun}
@@ -17,6 +20,114 @@
 \maketitle
 \tableofcontents
 
+\section{Perturbation Series}
+\subsection{Laurent-Expansion of the Resolvent}
+Let $X$ be a complex Banach space and $T :X \to X$ a bounded linear 
+operator and $R$ the resolvent of $T$.
+Let $ \lambda_0 \in \sigma (T)$ be an isolated point of the spectrum
+of $T$. Let $P$ be the spectral projection associated to $\lambda_0$
+and $Q:=I-P$ the complementary projection.
+Then the Laurent-expansion of $R$ around $\lambda_0$ is:
+\begin{equation}
+    \begin{split}
+        R(\lambda) &=
+         \sum_{n=1}^\infty (\lambda - \lambda_0)^{-n} \cdot (T- \lambda_0I)^{n-1} P  \\
+    &+ \sum_{n=0}^\infty (\lambda - \lambda_0)^n \cdot (-1)^n \cdot  S^{n+1} Q ,
+    \end{split}
+\end{equation}
+where $S$ is the inverse of $(\lambda_0 I- T)|_{Q(X)}: Q(X) \to Q(X)$.
+The inner radius of convergence of the Laurent-series is $0$ and the outer $d(\lambda_0 , \sigma(T))$.
+For $n \in \mathbb{Z}$ let $V_n$ be the coefficient of $(\lambda-\lambda_0)^{z}$ in the Laurent expansion.
+\subsection{Perturbation-series of the Resolvent}
+\begin{equation}
+    T(x) = \sum_{n=0}^\infty T_n x^n.
+\end{equation}
+Let $U:= \{ (\lambda, x) \in \mathbb{C}^2 : \lambda I - T(x) \ \text{invertible} \}$
+and define
+$R: U \to \mathscr{B}(X)$ by
+\begin{equation}
+    R(\lambda, x) := (\lambda I - T(x))^{-1}.
+\end{equation}
+Let $A(x):= T(x)-T_1$.
+Now 
+\begin{equation}
+   \lambda I - T (x) = \lambda I - T - A(x) = ( I - A(x) R(\lambda,0)) (\lambda I -T)
+\end{equation}
+and so 
+\begin{equation}
+    R(\lambda,x) = R(\lambda,0)  ( I - A(x) R(\lambda,0))^{-1} = 
+    R(\lambda,0)  \sum_{n=0}^\infty  (A(x) R(\lambda,0) \big)^n.
+\end{equation}
+From this it follows, by collecting the terms that have the same power of $x$, that
+\begin{equation}
+    R(\lambda, x) = R(\lambda,0)+ \sum_{n=1}^\infty R_n (\lambda) x^n
+\end{equation}
+with 
+\begin{equation}
+    R_n (\lambda) = 
+    \sum_{ \substack{(i_1, \dots, i_n) \in (\mathbb{N} \setminus \{0\})^n \\ i_1 + \cdots + i_n = n}   }
+     T_{i_1} R(\lambda,0)   \cdots T_{i_n}  R(\lambda,0).
+\end{equation}
+
+\subsection{Perturbation-series for the Eigenvalues}
+Let $\lambda_0$ be an isolated element of $\sigma (T_0)$ with finite dimensional
+generalized eigenspace (which is equivalent to the Laurent-expansion having only finitely many non-zero coefficients to negative power).
+Let $m$ be the dimension of the generalized eigenspace.
+Now for $x \in \mathbb{C}$ "small enough"
+\begin{equation}
+    P(x) = \frac{1}{2\pi i} \int_\gamma  R(\lambda,x) d \lambda
+\end{equation}
+is the projection onto sum of all the generalized eigenspaces to the eigenvalues
+that have split from $\lambda_0$ ("split eigenvalues").
+Therefore 
+\begin{equation}
+   \alpha (x) := \tr T(x) P(x) 
+\end{equation}
+is the weighted (by the dimension of the generalized eigenspaces) sum of all
+the split eigenvalues.
+
+Therefore
+\begin{equation}
+    \alpha (x) -  m \lambda_0 = \tr (T(x) - \lambda_0 I ) P(x)
+    = \frac{1}{2\pi i} \tr \int_\gamma (\lambda - \lambda_0 ) R(\lambda, x) d\lambda
+\end{equation}
+and so (the $n=1$ term vanishes)
+\begin{equation}
+    \begin{split}
+        &\alpha (x) -  m \lambda_0 
+        = \frac{1}{2\pi i} \tr \int_\gamma (\lambda - \lambda_0 )  R(\lambda,0)  \sum_{n=1}^\infty  (A(x) R(\lambda,0) \big)^n d\lambda \\
+        &= -\frac{1}{2\pi i} \tr \int_\gamma (\lambda - \lambda_0) \sum_{n=1}^\infty \frac{1}{n}
+        \bigg(\frac{\partial }{ \partial z}  (A(x) R(z,0))^n \bigg) (\lambda) d \lambda  \\
+        &= \frac{1}{2\pi i} \tr \int_\gamma  \sum_{n=1}^\infty \frac{1}{n}
+         (A(x) R(\lambda,0))^n  d \lambda
+    \end{split}
+\end{equation}
+upon collecting powers of $x$ in the above:
+\begin{equation}
+    \alpha (x) - m \lambda_0 = \sum_{n=1}^\infty \alpha_n x^n
+\end{equation}
+with
+\begin{equation}
+    \alpha_n := \sum_{k=1}^n  \sum_{ \substack{(i_1, \dots, i_k) \in (\mathbb{N} \setminus \{0\})^k \\ i_1 + \cdots + i_k = n}}
+    \frac{1}{2 \pi k i} \tr \int_\gamma T_{i_1} R(\lambda, 0)  \cdots  T_{i_k} R(\lambda, 0) d \lambda
+\end{equation}
+using the residue theorem and the Laurent expansion of the Resolvent around $\lambda_0$ to evaluate the integral
+\begin{equation}
+    \alpha_n =\sum_{k=1}^n 
+    \sum_{ \substack{(i_1, \dots, i_k) \in (\mathbb{N} \setminus \{0\})^k \\ i_1 + \cdots + i_k = n}}
+    \frac{1}{k} \sum_{\substack{(j_1, \dots, j_k) \in \mathbb{Z}^k\\ j_1 + \cdots + j_k = -1 }}
+    \tr T_{i_1} V_{j_1} \cdots T_{i_k} V_{j_k} .
+\end{equation}
+(add more details here ...)
+\subsection{Eigenvalue Perturbation-series for Linear Perturbation and Semi-simple Eigenvalue}
+In the special case of a linear perturbation ($T_n =0$ for all $n \in \mathbb{N}$ with $n\geq2$)
+and a semi simple eigenvalue (meaning that $(T_0- \lambda_0 I) P =0$)
+we obtain 
+\begin{equation}
+    \alpha_n= \frac{1}{n} \sum_{ \substack{(j_1, \dots, j_n) \in \mathbb{Z}^n \\ j_1 + \cdots + j_n = -1}}
+    \tr T_{i_1} V_{j_1} \cdots T_{i_k} V_{j_k}.
+\end{equation}
+This is the quantity that is calculated by the code.
 \section{Exact Solution Of 2x2 Case}
 
 For $E_1, E_2, a \in \mathbb{R}$
