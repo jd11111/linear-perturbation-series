@@ -48,6 +48,6 @@ pertCoeffNew2 :: Matrix -> Matrix -> Matrix ->  DHS.HashMap [Int] Matrix-> [[Int
 pertCoeffNew2 v p s st [] = (0.0,st)
 pertCoeffNew2 v p s st (x:xs) = let w = pertCoeffNew2 v p s st xs in let z = runMyMemo (weakCombToMatMemo v p s) (snd w) in (fst w + (trace . fst . z) x,snd . z $ x)
 
-pertCoeff :: Matrix -> Matrix -> Matrix -> Int -> ([Float],DHS.HashMap [Int] Matrix)
+pertCoeff :: Matrix -> Matrix -> Matrix -> Int -> ([Float],DHS.HashMap [Int] Matrix) --v is the perturbation, p the projection onto the eigenspace under consideration and s the reduced resolvent
 pertCoeff v p s 1 = let z = pertCoeffNew2 v p s DHS.empty (weakComps 1) in ([fst z],snd z)
 pertCoeff v p s n = let w = pertCoeff v p s (n-1) in let z = pertCoeffNew2 v p s (snd w) (weakComps n) in ((fst z):(fst w),snd z)
