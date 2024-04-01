@@ -1,48 +1,154 @@
-\documentclass[11pt]{article}
-\usepackage[utf8]{inputenc}
-\usepackage{amsmath}
-\usepackage{amsfonts}
-\usepackage{amssymb}
-\usepackage{mathtools}
-\usepackage{graphicx}
-\usepackage[english]{babel}
-\usepackage{xcolor}
-\usepackage{caption}
-\usepackage{hyperref}
-\usepackage{mathrsfs}
+\documentclass[11pt, a4paper]{article} % first option = text size, second = paper size, choose "article" for no chapters etc., else choose "report", only use "book" for irl printed book
+\usepackage[utf8]{inputenc} % better encoding of input
+\usepackage[T1]{fontenc} % better encoding of font
+\usepackage{lmodern} % better font
+\usepackage[english]{babel} %localization of document
+\usepackage{amssymb} %special math symbols + math fonts like frak cal etc...
+\usepackage{mathtools} %math env stuff (no need for amsmath)
+\usepackage{mathrsfs} % script math letters (\mathscr{})
+\usepackage{amsthm} % theorem, proposition env etc.
+\usepackage{hyperref} %links and pdf meta-data in document
+\usepackage{caption} %captions
+\usepackage{graphicx} %figures etc
+\usepackage{enumerate} %better enumerate i.e. different labeling (latin numerals, letters etc.)
+%\usepackage{subfiles}%enable multifile project
+\usepackage{siunitx} %package to display physics units, uncertainties etc.
+\usepackage[version=4]{mhchem} %chemistry package i.e. to write molecule formulas
+\usepackage{tikz} %tikz can be used to construct figures in tex
+\usetikzlibrary{cd} %tikz libary for commutative diagrams
+\usepackage{csquotes} %better quotation enviroment
+\usepackage[backend=biber, style=numeric,sorting=none]{biblatex}%bibliography as mentioned in text
+\usepackage{booktabs} %better tables
 
+%SETTINGS:
+\sisetup{separate-uncertainty = true} %display uncertainties with +/-
+\numberwithin{equation}{subsection} %equation numbering (different counter for every level)
+\addbibresource{sources.bib} %add the bibliography file
+\hypersetup{%settings for hyperref
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,
+    urlcolor=cyan,
+    pdftitle={}
+}
+
+%the following block makes the optional text in amsthm envs bold:
+\makeatletter
+\def\th@plain{%
+  \thm@notefont{}% same as heading font
+  \itshape % body font
+}
+\def\th@definition{%
+  \thm@notefont{}% same as heading font
+  \normalfont % body font
+}
+\makeatother
+
+\setcounter{MaxMatrixCols}{20}%increase max number of matrix columns
+
+%amsthm settings
+\theoremstyle{definition} %upright text
+\newtheorem{definition}{Definition}[section] %two part counter (first incremented at each section)
+\newtheorem{example}[definition]{Example} % all subsequent envs share counter with defi
+\newtheorem{remark}[definition]{Remark}
+\theoremstyle{plain} %italics
+\newtheorem{lemma}[definition]{Lemma}
+\newtheorem{proposition}[definition]{Proposition}
+
+%definition of math operators
+\DeclareMathOperator{\ran}{ran}
+\DeclareMathOperator{\lin}{lin}
+\DeclareMathOperator{\rad}{Rad}
 \DeclareMathOperator{\tr}{tr}
+\DeclareMathOperator{\obj}{Obj}
+\DeclareMathOperator{\mor}{Mor}
+\DeclareMathOperator{\ev}{eval}
+\DeclareMathOperator{\re}{Re}
+\DeclareMathOperator{\essran}{essRan}
+\DeclareMathOperator{\im}{Im}
+\DeclareMathOperator{\dom}{dom}
+\newcommand{\catname}[1]{\mathbf{#1}}
 
-\title{Linear Perturbation Series Documentation}
+\title{Linear Perturbation Series}
 \author{Jannik Daun}
 \begin{document}
-
 \maketitle
-\tableofcontents
+\begin{abstract}
+	The perturbation series for the eigenvalues of a linear perturbation
+	(Rayleigh-Schrödinger series) is derived in the context of bounded operators on a Banach space.
+	The Haskell code implementation to compute the coefficients in the linear perturbation series is briefly described.
+\end{abstract}
+
+
+\section{Introduction to the Main Result}
+Let $X$ be a complex Banach space.
+For example $X= \mathbb{C}^n$.
+Denote by $\mathscr{B}(X)$ the space of all bounded linear operators $X \to X$.
+So $\mathscr{B} (X) \cong \mathbb{C}^{n \times n}$ in the case $X= \mathbb{C}^n$.
+Let $T_0 , \ T_1 \in \mathscr{B}(X)$.
+Define $T : \mathbb{C} \to \mathscr{B}(X)$ by $T (x) = T_0 + x \cdot T_1$.
+Then $T$ is called a linear perturbation of $T_0$ by $T_1$.
+Let $\lambda_0$ be a semi-simple eigenvalue of $T_0$ that is isolated in $T_0$'s spectrum.
+Let $m< \infty$ be the dimension of the eigenspace of $T_0$ to eigenvalue $\lambda_0$.
+
+Then there exists a sequence $(\alpha_n)_{n \in \mathbb{N}}$ of complex numbers such that the following is true:
+The sum $\alpha (x)$
+of the eigenvalues of $T(x)$, where each eigenvalue is counted according to the dimension of the corresponding
+generalized eigenspace, is given by
+\begin{equation}
+	\boxed{\alpha (x) = m \cdot \lambda_0 + \sum_{n=1}^\infty \alpha_n x^n}
+\end{equation}
+for $x$ in some disk $D \subset \mathbb{C}$ centered at $0$. The most interesting case is of course when $m=1$. Then $\alpha(x)$ is an eigenvalue of $T(x)$ with $\lim_{x \to 0}\alpha(x) =\lambda_0$.
+
+Let $n \in \mathbb{N}$.
+Then the coefficient $\alpha_n$ can be obtained as follows:
+Define
+\begin{equation}
+	S_n := \{ (j_1, \dots, j_n ) \in \mathbb{N}^n : j_1 + \cdots + j_n = n-1 \}.
+\end{equation}
+Then the cyclic group of $n$ elements, $C_n$, acts on $S_n$ by circularly shifting the index of the tuple.
+Let $O_n \subset S_n$ be such that $O_n$ contains exactly one element of every orbit of the action of $C_n$ on $S_n$.
+Then
+\begin{equation}
+	\boxed{
+		\alpha_n = \sum_{o \in O_n }
+		\tr ( T_{1} \cdot  V_{o_1-1} \cdots T_{1} \cdot V_{o_n-1}),}
+\end{equation}
+where $V_{j}$ is the $j$-th coefficient in the Laurent expansion of the resolvent of $T_0$
+around $\lambda_0$.
+
+The code computes $\alpha_n$ in the case $X = \mathbb{C}^n$.
+The function pertCoeff in app/PerturbationSeries.hs returns a list of the coefficients $\alpha_n$ up to a given order.
+The algorithm to compute $O_n$ (as a list of lists instead of a set of tuples) is implemented in app/Combinatorics.hs.
+for mathematical and implementation details on the computation of $O_n$ see my blog post \cite{blog}.
 
 \section{Perturbation Series}
+In this section the main result is derived.
+The main source is Katos book \cite{kato_perturbation}.
 \subsection{Laurent-Expansion of the Resolvent}
-Let $X$ be a complex Banach space and $T_0 :X \to X$ a bounded linear 
+Let $X$ be a complex Banach space and $T_0 :X \to X$ a bounded linear
 operator and $R$ the resolvent of $T_0$.
 Let $ \lambda_0 \in \sigma (T_0)$ be an isolated point of the spectrum
 of $T_0$. Let $P$ be the spectral projection associated to $\lambda_0$
 and $Q:=I-P$ the complementary projection.
 Then the Laurent-expansion of $R$ around $\lambda_0$ is:
 \begin{equation}
-    \begin{split}
-        R(\lambda) &=
-         \sum_{n=1}^\infty (\lambda - \lambda_0)^{-n} \cdot (T_0- \lambda_0I)^{n-1} P  \\
-    &+ \sum_{n=0}^\infty (\lambda - \lambda_0)^n \cdot (-1)^n \cdot  S^{n+1} Q ,
-    \end{split}
+	\label{eq:resolvent-laurent-expansion}
+	\begin{split}
+		R(\lambda) &=
+		\sum_{n=1}^\infty (\lambda - \lambda_0)^{-n} \cdot (T_0- \lambda_0I)^{n-1} P  \\
+		&+ \sum_{n=0}^\infty (\lambda - \lambda_0)^n \cdot (-1)^n \cdot  S^{n+1} Q ,
+	\end{split}
 \end{equation}
 where $S$ is the inverse of $(\lambda_0 I- T_0)|_{Q(X)}: Q(X) \to Q(X)$.
+$S$ is called the reduced resolvent of $T_0$ at $\lambda_0$.
 The inner radius of convergence of the Laurent-series is $0$ and the outer $d(\lambda_0 , \sigma(T))$.
 
-\subsection{Perturbation-series of the Resolvent}
-Let $(T_n)_{n \in \mathbb{N}}$ be a sequence in $\mathscr{B}(X)$.
+\subsection{Perturbation-series for the Resolvent}
+Let $(T_n)_{n \in \mathbb{N}}$ be a sequence in $\mathscr{B}(X)$ (bounded  linear operators on $X$).
 Let $T : D \to \mathscr{B}(X)$ defined by
 \begin{equation}
-    T(x) := \sum_{n=0}^\infty T_n x^n,
+	T(x) := \sum_{n=0}^\infty T_n x^n,
 \end{equation}
 where $D$ is the open disk centered at 0 whose radius is the radius of
 convergence of the power series (assumed $>0$).
@@ -51,18 +157,18 @@ Let $U:= \{ (\lambda, x) \in \mathbb{C}^2 : \lambda I - T(x) \ \text{invertible}
 and define
 $R: U \to \mathscr{B}(X)$ by
 \begin{equation}
-    R(\lambda, x) := (\lambda I - T(x))^{-1}.
+	R(\lambda, x) := (\lambda I - T(x))^{-1}.
 \end{equation}
 Let $A(x):= T(x)-T_1$.
-Now 
+Now
 \begin{equation}
-   \lambda I - T (x) = \lambda I - T_0 - A(x) = ( I - A(x) R(\lambda,0)) (\lambda I -T_0)
+	\lambda I - T (x) = \lambda I - T_0 - A(x) = ( I - A(x) R(\lambda,0)) (\lambda I -T_0)
 \end{equation}
-and so 
+and so by using the geometric series:
 \begin{equation}
-    \label{eq:eq_R_expansion}
-    R(\lambda,x) = R(\lambda,0)  ( I - A(x) R(\lambda,0))^{-1} = 
-    R(\lambda,0)  \sum_{n=0}^\infty  (A(x) R(\lambda,0) \big)^n
+	\label{eq:eq_R_expansion}
+	R(\lambda,x) = R(\lambda,0)  ( I - A(x) R(\lambda,0))^{-1} =
+	R(\lambda,0)  \sum_{n=0}^\infty  (A(x) R(\lambda,0) \big)^n
 \end{equation}
 with a $>0$ radius of convergence.
 From this it follows, by collecting the terms that have the same power of $x$,
@@ -73,133 +179,141 @@ Let $\lambda_0$ be an isolated element of $\sigma (T_0)$ with finite dimensional
 generalized eigenspace (which is equivalent to the Laurent-expansion having only finitely many non-zero coefficients to negative power).
 Let $m$ be the dimension of the generalized eigenspace.
 Let $ \gamma$ be a circular path surrounding $\lambda_0$ once in the positiv sense.
-Now for $x \in \mathbb{C}$ "small enough"
+It follows from abstract properties of the holomorphic functional calculus,
+that for $x \in \mathbb{C}$ "small enough"
 \begin{equation}
-    P(x) = \frac{1}{2\pi i} \int_\gamma  R(\lambda,x) d \lambda
+	P(x) = \frac{1}{2\pi i} \int_\gamma  R(\lambda,x) d \lambda
 \end{equation}
 is the projection onto sum of all the generalized eigenspaces to the eigenvalues
 that have split from $\lambda_0$ ("split eigenvalues").
-Therefore 
+Therefore
 \begin{equation}
-   \alpha (x) := \tr T(x) P(x) 
+	\alpha (x) := \tr T(x) P(x)
 \end{equation}
 is the weighted (by the dimension of the generalized eigenspaces) sum of all
 the split eigenvalues.
 
 Therefore
 \begin{equation}
-    \alpha (x) -  m \lambda_0 = \tr (T(x) - \lambda_0 I ) P(x)
-    = \frac{1}{2\pi i} \tr \int_\gamma (\lambda - \lambda_0 ) R(\lambda, x) d\lambda
+	\alpha (x) -  m \lambda_0 = \tr (T(x) - \lambda_0 I ) P(x)
+	= \frac{1}{2\pi i} \tr \int_\gamma (\lambda - \lambda_0 ) R(\lambda, x) d\lambda
 \end{equation}
-Inserting the expansion for $R$ (equation \ref{eq:eq_R_expansion}): 
+Inserting the expansion for $R$ (equation \ref{eq:eq_R_expansion}):
 \begin{equation}
-    \begin{split}
-        &\alpha (x) -  m \lambda_0 
-        = \frac{1}{2\pi i} \tr \int_\gamma (\lambda - \lambda_0 )  R(\lambda,0)  \sum_{n=1}^\infty  (A(x) R(\lambda,0) \big)^n d\lambda \\
-        &= -\frac{1}{2\pi i} \tr \int_\gamma (\lambda - \lambda_0) \sum_{n=1}^\infty \frac{1}{n}
-        \bigg(\frac{\partial }{ \partial z}  (A(x) R(z,0))^n \bigg) (\lambda) d \lambda  \\
-        &= \frac{1}{2\pi i} \tr \int_\gamma  \sum_{n=1}^\infty \frac{1}{n}
-         (A(x) R(\lambda,0))^n  d \lambda.
-    \end{split}
+	\begin{split}
+		&\alpha (x) -  m \lambda_0
+		= \frac{1}{2\pi i} \tr \int_\gamma (\lambda - \lambda_0 )  R(\lambda,0)  \sum_{n=1}^\infty  (A(x) R(\lambda,0) \big)^n d\lambda \\
+		&= -\frac{1}{2\pi i} \tr \int_\gamma (\lambda - \lambda_0) \sum_{n=1}^\infty \frac{1}{n}
+		\bigg(\frac{\partial }{ \partial z}  (A(x) R(z,0))^n \bigg) (\lambda) d \lambda  \\
+		&= \frac{1}{2\pi i} \tr \int_\gamma  \sum_{n=1}^\infty \frac{1}{n}
+		(A(x) R(\lambda,0))^n  d \lambda.
+	\end{split}
 \end{equation}
 In the first equality the $n=0$ term vanishes.
 For the second the cyclicity of the trace and the derivative of the resolvent are used.
 For the third partial integration is used.
 Collecting powers of $x$ in the above:
 \begin{equation}
-    \alpha (x) - m \lambda_0 = \sum_{n=1}^\infty \alpha_n x^n
+	\alpha (x) - m \lambda_0 = \sum_{n=1}^\infty \alpha_n x^n
 \end{equation}
 with
 \begin{equation}
-    \alpha_n := \sum_{k=1}^n  \sum_{ \substack{(i_1, \dots, i_k) \in (\mathbb{N} \setminus \{0\})^k \\ i_1 + \cdots + i_k = n}}
-    \frac{1}{2 \pi k i} \tr \int_\gamma T_{i_1} R(\lambda, 0)  \cdots  T_{i_k} R(\lambda, 0) d \lambda .
+	\alpha_n := \sum_{k=1}^n  \sum_{ \substack{(i_1, \dots, i_k) \in (\mathbb{N} \setminus \{0\})^k \\ i_1 + \cdots + i_k = n}}
+	\frac{1}{2 \pi k i} \tr \int_\gamma T_{i_1} R(\lambda, 0)  \cdots  T_{i_k} R(\lambda, 0) d \lambda .
 \end{equation}
 For $n \in \mathbb{Z}$ let $V_n \in \mathscr{B}(X)$ be the coefficient of $(\lambda-\lambda_0)^{n}$ in the Laurent expansion of $T_0$
 around $\lambda_0$, then
-using the residue theorem and the Laurent expansion of the Resolvent around $\lambda_0$ to evaluate the integral:
+using the residue theorem and the Laurent expansion of the Resolvent (equation \ref{eq:resolvent-laurent-expansion}) around $\lambda_0$ to evaluate the integral:
 \begin{equation}
-    \alpha_n =\sum_{k=1}^n 
-    \sum_{ \substack{(i_1, \dots, i_k) \in (\mathbb{N} \setminus \{0\})^k \\ i_1 + \cdots + i_k = n}}
-    \frac{1}{k} \sum_{\substack{(j_1, \dots, j_k) \in \mathbb{Z}^k\\ j_1 + \cdots + j_k = -1 }}
-    \tr T_{i_1} V_{j_1} \cdots T_{i_k} V_{j_k}.
+	\alpha_n =\sum_{k=1}^n
+	\sum_{ \substack{(i_1, \dots, i_k) \in (\mathbb{N} \setminus \{0\})^k \\ i_1 + \cdots + i_k = n}}
+	\frac{1}{k} \sum_{\substack{(j_1, \dots, j_k) \in \mathbb{Z}^k\\ j_1 + \cdots + j_k = -1 }}
+	\tr T_{i_1} V_{j_1} \cdots T_{i_k} V_{j_k}.
 \end{equation}
 \subsection{Eigenvalue Perturbation-series for Linear Perturbation and Semi-simple Eigenvalue}
 In the special case of a linear perturbation ($T_n =0$ for all $n \in \mathbb{N}$ with $n\geq2$)
 and a semi simple eigenvalue (meaning that $(T_0- \lambda_0 I) P =0$)
-we obtain 
+we obtain
 \begin{equation}
-    \begin{split}
-        \alpha_n &=  \frac{1}{n} \sum_{ \substack{(j_1, \dots, j_n) \in \mathbb{Z}^n \\ j_1 + \cdots + j_n = -1}}
-        \tr T_{1} V_{j_1} \cdots T_{1} V_{j_k}\\
-        &= \frac{1}{n} \sum_{ \substack{(j_1, \dots, j_n) \in \mathbb{N}^n \\ j_1 + \cdots + j_n = n -1}}
-        \tr T_{1} V_{j_1-1} \cdots T_{1} V_{j_k-1}.
-    \end{split}
+	\begin{split}
+		\alpha_n &=  \frac{1}{n} \sum_{ \substack{(j_1, \dots, j_n) \in \mathbb{Z}^n \\ j_1 + \cdots + j_n = -1}}
+		\tr T_{1} V_{j_1} \cdots T_{1} V_{j_n}\\
+		&= \frac{1}{n} \sum_{ \substack{(j_1, \dots, j_n) \in \mathbb{N}^n \\ j_1 + \cdots + j_n = n -1}}
+		\tr T_{1} V_{j_1-1} \cdots T_{1} V_{j_n-1}.
+	\end{split}
 \end{equation}
-$\alpha_n$ is the quantity that is calculated by the code (for a range of $n$ values).
 To reduce the computational complexity we want to find
-all the index combinations $(j_1, \dots, j_n) \in \mathbb{N}^n  $ with $ j_1 + \cdots + j_n = n -1$
-up to cyclic permutations. 
+all $(j_1, \dots, j_n) \in \mathbb{N}^n  $ with $ j_1 + \cdots + j_n = n -1$
+that are the same
+up to cyclic permutations.
 It turns out, that every orbit under the cyclic group action on these indices has $n$ elements.
-The algorithm to find one element of each orbit is implemented in app/Combinatorics.hs.
-This algorithm is then used to calculate $\alpha_n$ in app/PerturbationSeries.hs.
-
-\section{Exact Solution Of 2x2 Case}
+For $n \in \mathbb{N}$ let $O_n$ be a set of indices so that each element is a representant of each distinct orbit of the cyclic group acting on the the indices
+$(j_1, \dots, j_n) \in \mathbb{N}^n  $ with $ j_1 + \cdots + j_n = n -1$.
+Then
+\begin{equation}
+	\begin{split}
+		\alpha_n &= \sum_{o \in O_n }
+		\tr T_{1} V_{o_1-1} \cdots T_{1} V_{o_n-1}.
+	\end{split}
+\end{equation}
+\section{Exact Solution of $2 \times 2$ Case}
+In this section the linear perturbations series for a special toy case will be solved by hand.
+This allows to compare the results generated by the code to the analytic result.
+Namely the coefficients of the powers of $x$ in equation \ref{eq:Eanalytical}
+can be compared to the ones calculated using the code.
+This comparison is implemented in app/test.hs.
 For $E_1, E_2, a \in \mathbb{R}$
 let
 $$H:=
-\begin{pmatrix}
-E_1 & 0 \\
-0 & E_2
-\end{pmatrix}$$
+	\begin{pmatrix}
+		E_1 & 0   \\
+		0   & E_2
+	\end{pmatrix}$$
 and
 $$
-V :=
-\begin{pmatrix}
-0 & a \\
-a & 0
-\end{pmatrix}.
+	V :=
+	\begin{pmatrix}
+		0 & a \\
+		a & 0
+	\end{pmatrix}.
 $$
 Define $T: \mathbb{C} \to \mathbb{C}^{2 \times 2}$
 by $T \ x =  H + x \cdot V$.
 Assume that $E_1 \neq E_2$, then
 the two eigenvalues $E_\pm$ of $T \  x$ (the roots of the characteristic polynomial) can be found as
 \begin{equation}
-   E_\pm (x) =  \frac{E_{1}+ E_2}{2}
-   \pm \frac{|E_1 -E_2|}{2} \sqrt{
-    1 + \bigg(\frac{2 a x}{E_1-E_2}\bigg)^2
-   }.
+	E_\pm (x) =  \frac{E_{1}+ E_2}{2}
+	\pm \frac{|E_1 -E_2|}{2} \sqrt{
+		1 + \bigg(\frac{2 a x}{E_1-E_2}\bigg)^2
+	}.
 \end{equation}
 Now upon potentially relabeling $E_\pm$ we obtain
 \begin{equation}
-    E_\pm (x) =  \frac{E_{1}+ E_2}{2}
-    \pm \frac{E_1 -E_2}{2} \sqrt{
-     1 + \bigg(\frac{2 a x}{E_1-E_2}\bigg)^2
-    }.
- \end{equation}
+	E_\pm (x) =  \frac{E_{1}+ E_2}{2}
+	\pm \frac{E_1 -E_2}{2} \sqrt{
+		1 + \bigg(\frac{2 a x}{E_1-E_2}\bigg)^2
+	}.
+\end{equation}
 Now the binomial series says that for $x \in \mathbb{C}$ with $|x|<1$:
 \begin{equation}
-    (1+x)^{1/2} = \sum_{k=0}^\infty
-    {1/2 \choose k} x^k,
+	(1+x)^{1/2} = \sum_{k=0}^\infty
+	{1/2 \choose k} x^k,
 \end{equation}
 where the radius of convergence of the power series is 1.
 Therefore
 \begin{equation}
-    \begin{split}
-        E_\pm (x) &=  \frac{E_{1}+ E_2}{2}
-   \pm \frac{E_1 -E_2}{2} \sum_{k=0}^\infty
-   {1/2 \choose k} \bigg(\frac{2 a x}{E_1-E_2}\bigg)^{2k} \\
-   &= E_{1/2} \pm \frac{1}{2} \sum_{k=1}^\infty
-   {1/2 \choose k} \frac{(2 a)^{2k}}{(E_1-E_2)^{2k-1}} x^{2k}
-    \end{split}
+	\label{eq:Eanalytical}
+	\begin{split}
+		E_\pm (x) &=  \frac{E_{1}+ E_2}{2}
+		\pm \frac{E_1 -E_2}{2} \sum_{k=0}^\infty
+		{1/2 \choose k} \bigg(\frac{2 a x}{E_1-E_2}\bigg)^{2k} \\
+		&= E_{1/2} \pm \frac{1}{2} \sum_{k=1}^\infty
+		{1/2 \choose k} \frac{(2 a)^{2k}}{(E_1-E_2)^{2k-1}} x^{2k}
+	\end{split}
 \end{equation}
 where the radius of convergence $r$ of the power series is
 \begin{equation}
-    r = \frac{|E_1 -E_2|}{2 |a|} .
+	r = \frac{|E_1 -E_2|}{2 |a|}.
 \end{equation}
-Since the coefficients in a power series expansion are unique
-we can use the above equation to test the validity of the code,
-by comparing the exact coefficients in the above expression with the calculated ones
-from the code.
-This is implemented in the /app/test.hs file.
-
+\printbibliography %print the bibliography
 \end{document}
