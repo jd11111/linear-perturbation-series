@@ -30,7 +30,7 @@ T_1 :=
 -4 & -8 & 1
 \end{pmatrix}.
 ```
-Define $T: \mathbb{C} \to \mathbb{C}^{3 \times 3} $ by $T(x) = T_0 + x \cdot T_1$.
+Define $` T: \mathbb{C} \to \mathbb{C}^{3 \times 3} `$ by $T(x) = T_0 + x \cdot T_1$.
 Say we want to know what happens to the eigenvalue 1 of $T(0)$ as $x$ increases.
 Then the projection $P$ onto the eigenspace to eigenvalue 1 of $T_0$ is simply
 ```math
@@ -70,7 +70,7 @@ Calculated perturbation series coefficients:
 The returned list are the coefficients in the perturbation series.
 Therefore the eigenvalue $\lambda(x)$ of $T(x)$ with $\lambda(0)=1$ is approximately given by
 ```math
-\lambda (x) \approx 1 + 1.0 \cdot x - 4.665 \cdot x^2 -9.554711 x^3 -0.7601011 \cdot x^4
+\lambda (x) \approx 1 + 1.0 \cdot x - 4.6665 \cdot x^2 -9.554711 x^3 -0.7601011 \cdot x^4
 -14.0054865 \cdot x^5 + \cdots 
 ```
 for small $x$.
