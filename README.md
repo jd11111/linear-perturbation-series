@@ -69,14 +69,15 @@ Calculated perturbation series coefficients:
 ```
 The returned list are the coefficients in the perturbation series.
 Therefore the eigenvalue $\lambda(x)$ of $T(x)$ with $\lambda(0)=1$ is approximately given by
-$$
+```math
 \lambda (x) \approx 1 + 1.0 \cdot x - 4.665 \cdot x^2 -9.554711 x^3 -0.7601011 \cdot x^4
 -14.0054865 \cdot x^5 -7.2533092 \cdot x^6 -78.31503\cdot x^7 -68.54976 \cdot x^8
--252.03307 \cdot x^9.
-$$
+-252.03307 \cdot x^9
+```
+for small $x$.
 The same thing can be done for the other 2 eigenvalues of $T_0$ (3 and -4).
 
 The so obtained series for the eigenvalues can be compared to the eigenvalues obtained
-using a linear algebra library.
+using a linear algebra library (this is done in the jupyter notebook in the visualisation directory).
 The result is the following:
 <img src="visualisation/evals.png" alt="drawing" width="800"/>
