@@ -47,7 +47,7 @@ S =
 \begin{pmatrix}
 0 & 0 & 0 \\
 0 & (1-4)^{-1} & 0 \\
-0 & (1+3)^{-1} & 0
+0 & 0 &(1+3)^{-1}
 \end{pmatrix}.
 ```
 The following terminal interaction shows how we can calculate the perturbation series 
@@ -79,7 +79,7 @@ The same thing can be done for the other 2 eigenvalues of $T_0$ (3 and -4).
 The so obtained series for the eigenvalues can be compared to the eigenvalues obtained
 using a linear algebra library.
 This is done [here](visualisation/visualisation.py).
-The result is the following (the actual eigenvalues start getting complex for larger $x$):
+The result is the following (two of the eigenvalues start getting complex for larger $x$):
 
 <img src="visualisation/evals.png" alt="drawing" width="800"/>
 
