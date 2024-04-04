@@ -36,4 +36,3 @@ plt.legend()
 ax.set_xlim(0,0.5)
 plt.grid(True)
 plt.savefig("evals.png",dpi=150)
-

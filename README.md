@@ -78,7 +78,7 @@ The same thing can be done for the other 2 eigenvalues of $T_0$ (3 and -4).
 
 The so obtained series for the eigenvalues can be compared to the eigenvalues obtained
 using a linear algebra library.
-This is done [here](visualisation/visualisation.py).
+This is done [here](visualisation).
 The result is the following (two of the eigenvalues start getting complex for larger $x$):
 
 <img src="visualisation/evals.png" alt="drawing" width="800"/>
