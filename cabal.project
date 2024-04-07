@@ -1,0 +1,10 @@
+packages: linear-perturbation-series.cabal 
+
+source-repository-package
+    type: git
+    location: https://github.com/jd11111/mat-mul
+
+optimization: 2
+
+-- profiling: True
+-- profiling-detail: toplevel-functions

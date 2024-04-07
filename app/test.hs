@@ -22,7 +22,7 @@ pertCoeffExactE1 e1 e2 a k = 0.5*(2.0*a)^(2*k)* binomCoeff 0.5 k /((e1 - e2)^(2*
 
 --exact solution for the coefficients in the perturbation series for
 --the eigenvalue that splits from e2:
-pertCoeffExactE2 ::  Float -> Float -> Float -> Integer -> Float 
+pertCoeffExactE2 ::  Float -> Float -> Float -> Integer -> Float
 pertCoeffExactE2 e1 e2 a k = (-1)*pertCoeffExactE1 e1 e2 a k
 
 n :: Integer
@@ -41,11 +41,15 @@ main = do{
         e1 = 2.0*(ns !! 1)-1.0;
         e2 = 2.0*(ns !! 2)-1.0;
         a = 2.0*(ns !! 3) -1.0;
-        p1 = GenMat{int_data = listArray (0,3) [1.0,0.0,0.0,0.0], rows=2, cols=2};
-        p2 = GenMat{int_data = listArray (0,3) [0.0,0.0,0.0,1.0], rows=2, cols=2};
-        v = GenMat{int_data = listArray (0,3) [0.0,a,a,0.0], rows=2, cols=2};
-        s1 = GenMat{int_data = listArray (0,3) [0.0,0.0,0.0,1/(e1 -e2)], rows=2, cols=2};
-        s2 = GenMat{int_data = listArray (0,3) [1/(e2-e1),0.0,0.0,0.0], rows=2, cols=2};
+        p1 = mkRealMat (listArray (0,3) [1.0,0.0,0.0,0.0]) 2 2 :: MyMatrix Float;
+        --p1 = GenMat{int_data = listArray (0,3) [1.0,0.0,0.0,0.0], rows=2, cols=2};
+        --p2 = GenMat{int_data = listArray (0,3) [0.0,0.0,0.0,1.0], rows=2, cols=2};
+        p2 = mkRealMat (listArray (0,3) [0.0,0.0,0.0,1.0]) 2 2:: MyMatrix Float;
+        --v = GenMat{int_data = listArray (0,3) [0.0,a,a,0.0], rows=2, cols=2};
+        v = mkRealMat (listArray (0,3) [0.0,a,a,0.0]) 2 2:: MyMatrix Float;
+        --s1 = GenMat{int_data = listArray (0,3) [0.0,0.0,0.0,1/(e1 -e2)], rows=2, cols=2};
+        s1 = mkRealMat (listArray (0,3) [0.0,0.0,0.0,1/(e1 -e2)]) 2 2:: MyMatrix Float;
+        s2 = mkRealMat (listArray (0,3) [1/(e2-e1),0.0,0.0,0.0]) 2 2:: MyMatrix Float;
         x = concatMap ((\z-> 0:[z]) . pertCoeffExactE1 e1 e2 a) [1.. n];
         y = concatMap ((\z-> 0:[z]) . pertCoeffExactE2 e1 e2 a) [1..n];
         z1 = reverse $ fst (pertCoeff v p1 s1 (2* fromInteger n));
