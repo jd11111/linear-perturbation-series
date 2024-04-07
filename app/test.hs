@@ -26,7 +26,7 @@ pertCoeffExactE2 ::  Float -> Float -> Float -> Integer -> Float
 pertCoeffExactE2 e1 e2 a k = (-1)*pertCoeffExactE1 e1 e2 a k
 
 n :: Integer
-n = 5 
+n = 6
 
 closeCheck :: Float -> Float -> Bool
 closeCheck f1 f2 = abs (f1 - f2)  <= 0.000001 * (abs f1 + abs f2)
@@ -42,12 +42,8 @@ main = do{
         e2 = 2.0*(ns !! 2)-1.0;
         a = 2.0*(ns !! 3) -1.0;
         p1 = mkRealMat (listArray (0,3) [1.0,0.0,0.0,0.0]) 2 2 :: MyMatrix Float;
-        --p1 = GenMat{int_data = listArray (0,3) [1.0,0.0,0.0,0.0], rows=2, cols=2};
-        --p2 = GenMat{int_data = listArray (0,3) [0.0,0.0,0.0,1.0], rows=2, cols=2};
         p2 = mkRealMat (listArray (0,3) [0.0,0.0,0.0,1.0]) 2 2:: MyMatrix Float;
-        --v = GenMat{int_data = listArray (0,3) [0.0,a,a,0.0], rows=2, cols=2};
         v = mkRealMat (listArray (0,3) [0.0,a,a,0.0]) 2 2:: MyMatrix Float;
-        --s1 = GenMat{int_data = listArray (0,3) [0.0,0.0,0.0,1/(e1 -e2)], rows=2, cols=2};
         s1 = mkRealMat (listArray (0,3) [0.0,0.0,0.0,1/(e1 -e2)]) 2 2:: MyMatrix Float;
         s2 = mkRealMat (listArray (0,3) [1/(e2-e1),0.0,0.0,0.0]) 2 2:: MyMatrix Float;
         x = concatMap ((\z-> 0:[z]) . pertCoeffExactE1 e1 e2 a) [1.. n];
